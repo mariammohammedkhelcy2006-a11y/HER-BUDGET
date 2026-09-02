@@ -1,0 +1,13 @@
+fastapi==0.104.1
+uvicorn==0.24.0
+sqlalchemy==2.0.23
+pydantic==2.5.0
+python-dotenv==1.0.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+# passlib 1.7.x expects the bcrypt 4.0 API; this avoids a startup warning.
+bcrypt==4.0.1
+psycopg[binary]==3.2.3
+httpx==0.27.2
+# psycopg2-binary is optional for Neon/Postgres and is not required for local SQLite development.
+# It can fail to build on some newer Python/Windows environments.

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HerBudget - Personal Finance Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="authModal" class="auth-modal visible">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="brand-mark">H</div>
+                <h2>HerBudget</h2>
+            </div>
+
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab active" data-auth-tab="login">Login</button>
+                <button type="button" class="auth-tab" data-auth-tab="register">Register</button>
+            </div>
+
+            <form id="authForm" class="auth-form">
+                <div id="authNameGroup" class="form-group auth-name-group" style="display: none;">
+                    <label for="authName">Full name</label>
+                    <input id="authName" type="text" placeholder="John Doe" />
+                </div>
+
+                <div class="form-group">
+                    <label for="authEmail">Email</label>
+                    <input id="authEmail" type="email" placeholder="you@example.com" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="authPassword">Password</label>
+                    <input id="authPassword" type="password" placeholder="••••••••" required />
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="app-container" id="appContainer" style="display: none;">
+        <div class="app-shell">
+            <aside class="sidebar">
+                <div class="brand-row">
+                    <div class="brand-mark">H</div>
+                    <div>
+                        <span class="brand-name">HerBudget</span>
+                    </div>
+                </div>
+
+                <nav class="side-nav" aria-label="Sidebar navigation">
+                    <button class="nav-item active" data-page="home" type="button">
+                        <span class="nav-icon">⌂</span>
+                        <span class="nav-label">Dashboard</span>
+                    </button>
+                    <button class="nav-item" data-page="transactions" type="button">
+                        <span class="nav-icon">↔</span>
+                        <span class="nav-label">Transactions</span>
+                    </button>
+                    <button class="nav-item" data-page="budgets" type="button">
+                        <span class="nav-icon">▣</span>
+                        <span class="nav-label">Budgets</span>
+                    </button>
+                    <button class="nav-item" data-page="goals" type="button">
+                        <span class="nav-icon">◎</span>
+                        <span class="nav-label">Savings Goals</span>
+                    </button>
+                    <button class="nav-item" data-page="analytics" type="button">
+                        <span class="nav-icon">◫</span>
+                        <span class="nav-label">Reports</span>
+                    </button>
+                    <button class="nav-item" data-page="settings" type="button">
+                        <span class="nav-icon">⚙</span>
+                        <span class="nav-label">Settings</span>
+                    </button>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="mini-profile">
+                        <div class="mini-avatar">SM</div>
+                        <div class="mini-meta">
+                            <span id="userName">Chris.R</span>
+                            <small>Premium</small>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="content-panel">
+                <header class="topbar">
+                    <div class="page-heading">
+                        <p class="that-day" id="todayLabel">Today</p>
+                        <h1>Financial dashboard</h1>
+                    </div>
+
+                    <div class="toolbar">
+                        <label class="search-box" aria-label="Search transactions">
+                            <span>⌕</span>
+                            <input type="text" id="searchInput" placeholder="Search transactions" />
+                        </label>
+                        <button class="ghost-btn" id="notificationBtn" type="button" aria-label="Notifications">🔔</button>
+                        <button class="ghost-btn" id="settingsBtn" type="button" aria-label="Theme">☼</button>
+                        <div class="profile-pill"><span>SM</span></div>
+                    </div>
+                </header>
+
+                <main class="app-main">
+                    <section class="overview-topbar">
+                        <div>
+                            <p class="eyebrow">Overview</p>
+                            <h2>Welcome back</h2>
+                        </div>
+                        <button class="btn btn-primary" id="addTransactionBtn" type="button">+ Add transaction</button>
+                    </section>
+
+                    <section class="balance-card-section">
+                        <div class="balance-card">
+                            <div class="balance-meta">
+                                <div class="currency-pill">GHS</div>
+                                <button class="secondary-action" type="button">Breakdown</button>
+                            </div>
+                            <div class="balance-footer">
+                                <span class="balance-subtext">Total balance</span>
+                                <span class="trend-pill">+12.4%</span>
+                            </div>
+                            <p class="balance-amount" id="balanceValue">GH₵0.00</p>
+                        </div>
+                    </section>
+
+                    <section class="quick-stats" aria-label="Summary cards">
+                        <article class="stat-mini">
+                            <div class="stat-top">
+                                <span class="stat-icon success">↗</span>
+                                <span class="stat-label">Income</span>
+                            </div>
+                            <p class="stat-mini-value income" id="incomeValue">GH₵0.00</p>
+                            <small class="stat-footnote">This month</small>
+                        </article>
+                        <article class="stat-mini">
+                            <div class="stat-top">
+                                <span class="stat-icon danger">↘</span>
+                                <span class="stat-label">Expenses</span>
+                            </div>
+                            <p class="stat-mini-value expense" id="expenseValue">GH₵0.00</p>
+                            <small class="stat-footnote">This month</small>
+                        </article>
+                        <article class="stat-mini">
+                            <div class="stat-top">
+                                <span class="stat-icon neutral">◌</span>
+                                <span class="stat-label">Savings</span>
+                            </div>
+                            <p class="stat-mini-value" id="savingsValue">GH₵0.00</p>
+                            <small class="stat-footnote">Net</small>
+                        </article>
+                        <article class="stat-mini">
+                            <div class="stat-top">
+                                <span class="stat-icon info">◎</span>
+                                <span class="stat-label">Transactions</span>
+                            </div>
+                            <p class="stat-mini-value" id="transactionCountValue">0</p>
+                            <small class="stat-footnote">Logged</small>
+                        </article>
+                    </section>
+
+                    <section class="services-section">
+                        <div class="section-header">
+                            <h3 class="section-title">Quick actions</h3>
+                        </div>
+                        <div class="services-grid">
+                            <button class="service-item" data-action="add-income" type="button">
+                                <span class="service-icon success">↓</span>
+                                <span>Add income</span>
+                            </button>
+                            <button class="service-item" data-action="add-expense" type="button">
+                                <span class="service-icon danger">↑</span>
+                                <span>Add expense</span>
+                            </button>
+                            <button class="service-item" data-action="budget" type="button">
+                                <span class="service-icon info">▣</span>
+                                <span>Create budget</span>
+                            </button>
+                            <button class="service-item" data-action="goal" type="button">
+                                <span class="service-icon purple">◎</span>
+                                <span>Goal</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="stats-row">
+                        <div class="chart-panel">
+                            <div class="panel-header">
+                                <div>
+                                    <p class="eyebrow">Spending overview</p>
+                                    <h3>Budget activity</h3>
+                                </div>
+                                <button class="mini-btn" type="button">This month</button>
+                            </div>
+                            <div id="categoryChart" class="category-chart">
+                                <div class="chart-card">
+                                    <div class="donut-chart" aria-label="Portfolio allocation chart">
+                                        <div class="donut-inner">
+                                            <span class="allocation-label">Allocation</span>
+                                            <strong>38%</strong>
+                                            <span class="currency-code">GHS</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="emptyCategories" class="empty-state-small" style="display: none;">
+                                <p>No expenses yet.</p>
+                            </div>
+                        </div>
+
+                        <div class="insight-panel">
+                            <div class="panel-header">
+                                <div>
+                                    <p class="eyebrow">Insights</p>
+                                    <h3>Smart notes</h3>
+                                </div>
+                            </div>
+                            <ul class="insight-list">
+                                <li><span class="dot green"></span> Your spending is 8% below last month.</li>
+                                <li><span class="dot amber"></span> Groceries are trending upward this week.</li>
+                                <li><span class="dot violet"></span> Your emergency fund is still on track.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="filters-section">
+                        <div class="filters-row">
+                            <select id="typeFilter" class="filter-select">
+                                <option value="">All Types</option>
+                                <option value="income">Income</option>
+                                <option value="expense">Expense</option>
+                            </select>
+                            <select id="categoryFilter" class="filter-select">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <section class="transactions-section">
+                        <div class="section-header">
+                            <h3 class="section-title">Recent transactions</h3>
+                            <a href="#" class="see-all-link" id="seeAllLink">View all →</a>
+                        </div>
+
+                        <div id="transactionsList" class="transactions-list">
+                            <div class="loading">Loading transactions...</div>
+                        </div>
+
+                        <div id="emptyState" class="empty-state" style="display: none;">
+                            <div class="empty-icon">📭</div>
+                            <p>No transactions yet.</p>
+                            <p class="empty-subtext">Start tracking your money by adding your first transaction.</p>
+                            <button class="btn btn-primary" id="emptyStateAddBtn" type="button">
+                                <span class="plus-icon">+</span> Add Transaction
+                            </button>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transactionModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Transaction</h2>
+                <button class="modal-close" id="closeModalBtn">&times;</button>
+            </div>
+
+            <form id="transactionForm" class="transaction-form">
+                <div class="form-group">
+                    <label for="transactionType">Transaction Type *</label>
+                    <select id="transactionType" required>
+                        <option value="">Select type</option>
+                        <option value="income">Income</option>
+                        <option value="expense">Expense</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Amount (GH₵) *</label>
+                    <input 
+                        type="number" 
+                        id="amount" 
+                        step="0.01" 
+                        min="0.01" 
+                        placeholder="0.00" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select id="category" required>
+                        <option value="">Select category</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <input 
+                        type="text" 
+                        id="description" 
+                        placeholder="Optional description"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date *</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Transaction</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification" style="display: none;"></div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal" style="display: none;">
+        <div class="modal-content modal-confirm">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+            </div>
+            <p class="confirm-text">Are you sure you want to delete this transaction?</p>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="confirmCancelBtn">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
