@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "buildCommand": "node frontend/build.js",
+  "outputDirectory": "frontend/dist",
+  "cleanUrls": true
+}

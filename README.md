@@ -460,3 +460,16 @@ Before deploying, copy `backend/.env.example` to the host's secret environment a
 Do not deploy the local `backend/.env` or any SQLite database. The application deliberately
 refuses to start in production when `DATABASE_URL` is SQLite. After deployment, verify
 `https://your-app.example.com/health` returns `{"status":"ok","database":"ok"}`.
+
+### Render + Vercel
+
+1. In Render, create a Blueprint from this repository. It reads `render.yaml` and deploys
+   the backend Docker service. Enter the Neon pooled `DATABASE_URL` when prompted.
+2. Copy the resulting Render service URL, such as `https://herbudget-api.onrender.com`.
+3. In Vercel, import the same repository and add `HERBUDGET_API_URL` with that Render URL
+   for Production, Preview, and Development as appropriate. Vercel uses `vercel.json` to
+   build the static frontend.
+4. Back in Render, set `ALLOWED_ORIGINS` to the Vercel production URL, then redeploy Render.
+
+The Vercel build deliberately fails without `HERBUDGET_API_URL`; this prevents a production
+frontend from accidentally sending login and finance requests to its own static domain.
