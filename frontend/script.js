@@ -42,6 +42,8 @@ const confirmCancelBtn = document.getElementById('confirmCancelBtn');
 const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 const notificationBtn = document.getElementById('notificationBtn');
 const settingsBtn = document.getElementById('settingsBtn');
+const topLogoutBtn = document.getElementById('topLogoutBtn');
+const forgotPasswordLink = document.getElementById('forgotPasswordLink');
 const seeAllLink = document.getElementById('seeAllLink');
 const userNameEl = document.getElementById('userName');
 
@@ -676,6 +678,8 @@ cancelBtn.addEventListener('click', closeTransactionModal);
 transactionForm.addEventListener('submit', handleFormSubmit);
 notificationBtn.addEventListener('click', () => showNotification('Notifications are enabled', 'success'));
 settingsBtn.addEventListener('click', () => showNotification('Settings panel coming soon', 'warning'));
+topLogoutBtn.addEventListener('click', logout);
+forgotPasswordLink.addEventListener('click', () => showNotification('Sign in, then open Settings to reset your password.', 'warning'));
 seeAllLink.addEventListener('click', (e) => {
     e.preventDefault();
     document.querySelector('.transactions-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });

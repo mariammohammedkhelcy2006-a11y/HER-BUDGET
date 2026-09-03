@@ -216,6 +216,23 @@ body::before {
     margin-top: 5px;
 }
 
+.forgot-password-link {
+    align-self: center;
+    border: 0;
+    background: transparent;
+    color: var(--cyan);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 8px;
+}
+
+.forgot-password-link:hover {
+    color: white;
+    text-decoration: underline;
+}
+
 .app-container {
     position: relative;
     width: 100vw;
@@ -424,6 +441,24 @@ body::before {
     border: 1px solid rgba(255,255,255,0.12);
     font-size: 0.76rem;
     font-weight: 800;
+}
+
+.sign-out-top {
+    border: 1px solid rgba(248, 113, 113, 0.28);
+    border-radius: 11px;
+    background: rgba(248, 113, 113, 0.08);
+    color: #fca5a5;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.74rem;
+    font-weight: 800;
+    padding: 10px 12px;
+    white-space: nowrap;
+}
+
+.sign-out-top:hover {
+    background: rgba(248, 113, 113, 0.16);
+    color: white;
 }
 
 .overview-topbar {
@@ -1965,5 +2000,188 @@ body::before {
     .plan-row .btn-delete {
         grid-column: 1 / -1;
         justify-self: start;
+    }
+}
+
+@media (max-width: 760px) {
+    html,
+    body {
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .app-shell {
+        min-height: 100vh;
+    }
+
+    .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        padding: 14px 12px 10px;
+        background: rgba(8, 12, 18, 0.97);
+        backdrop-filter: blur(18px);
+    }
+
+    .brand-row {
+        padding: 0 6px 12px;
+    }
+
+    .brand-mark {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        font-size: 1.1rem;
+    }
+
+    .brand-name {
+        font-size: 1.05rem;
+    }
+
+    .side-nav {
+        display: flex;
+        flex-direction: row;
+        gap: 7px;
+        margin: 0;
+        padding: 0 2px 3px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .side-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    .side-nav .nav-item {
+        flex: 0 0 auto;
+        width: auto;
+        min-height: 58px;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        padding: 8px 11px;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .side-nav .nav-icon {
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    .side-nav .nav-label {
+        font-size: 0.62rem;
+        white-space: nowrap;
+    }
+
+    .sidebar-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 10px;
+    }
+
+    .mini-profile {
+        flex: 1;
+        min-width: 0;
+        padding: 7px 8px;
+    }
+
+    .mini-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    .logout-button {
+        width: auto;
+        flex: 0 0 auto;
+        padding: 9px 10px;
+        border: 1px solid rgba(248, 113, 113, 0.18) !important;
+        color: #fca5a5 !important;
+    }
+
+    .logout-button .nav-icon {
+        font-size: 1rem;
+    }
+
+    .content-panel {
+        min-width: 0;
+    }
+
+    .topbar {
+        gap: 14px;
+        padding: 20px 18px 14px;
+    }
+
+    .page-heading h1 {
+        font-size: 1.65rem;
+    }
+
+    .toolbar {
+        gap: 8px;
+    }
+
+    .ghost-btn,
+    .profile-pill {
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+    }
+
+    .app-main {
+        padding-bottom: 28px;
+    }
+
+    .overview-topbar {
+        gap: 16px;
+        padding-top: 20px;
+        padding-bottom: 14px;
+    }
+
+    .overview-topbar .btn {
+        width: 100%;
+    }
+
+    .quick-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+    }
+
+    .stat-mini {
+        padding: 13px 11px;
+        border-radius: 16px;
+    }
+
+    .stat-mini-value {
+        font-size: 1rem;
+    }
+
+    .balance-card {
+        padding: 16px;
+        border-radius: 22px;
+    }
+
+    .balance-amount {
+        font-size: 2.25rem;
+    }
+
+    .service-item {
+        min-height: 62px;
+        padding: 12px 10px;
+        border-radius: 15px;
+    }
+
+    .secondary-page {
+        padding-left: 18px;
+        padding-right: 18px;
+    }
+
+    .page-title {
+        margin-bottom: 18px;
+    }
+
+    .page-content {
+        gap: 12px;
     }
 }
