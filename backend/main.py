@@ -15,11 +15,16 @@ from sqlalchemy.orm import Session
 import crud
 from auth import authenticate_user, create_access_token, get_current_user, get_password_hash
 from database import Base, engine, get_db
-from models import Transaction, User
+from models import Budget, SavingsGoal, Transaction, User
 from schemas import (
     CategoriesResponse,
+    BudgetBase,
+    BudgetResponse,
     CategorySpending,
     DashboardResponse,
+    GoalBase,
+    GoalResponse,
+    PasswordChange,
     TokenResponse,
     TransactionCreate,
     TransactionResponse,
@@ -27,6 +32,7 @@ from schemas import (
     UserCreate,
     UserLogin,
     UserResponse,
+    UserUpdate,
 )
 
 Base.metadata.create_all(bind=engine)
@@ -110,6 +116,31 @@ def login_user(user: UserLogin, db: Session = Depends(get_db)):
 def read_current_user(current_user: User = Depends(get_current_user)):
     """Return the authenticated user profile."""
     return current_user
+
+
+@app.patch("/api/auth/me", response_model=UserResponse)
+def update_current_user(
+    update: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    current_user.name = update.name
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@app.put("/api/auth/password")
+def change_password(
+    password_change: PasswordChange,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if not authenticate_user(db, current_user.email, password_change.current_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    current_user.password_hash = get_password_hash(password_change.new_password)
+    db.commit()
+    return {"message": "Password updated successfully"}
 
 
 @app.get("/api/dashboard", response_model=DashboardResponse)
@@ -227,6 +258,56 @@ def get_categories():
             "Other",
         ],
     }
+
+
+@app.get("/api/budgets", response_model=List[BudgetResponse])
+def get_budgets(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return db.query(Budget).filter(Budget.user_id == current_user.id).order_by(Budget.month.desc()).all()
+
+
+@app.post("/api/budgets", response_model=BudgetResponse, status_code=status.HTTP_201_CREATED)
+def create_budget(budget: BudgetBase, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    record = Budget(user_id=current_user.id, **budget.model_dump())
+    db.add(record)
+    db.commit()
+    db.refresh(record)
+    return record
+
+
+@app.delete("/api/budgets/{budget_id}")
+def delete_budget(budget_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    record = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == current_user.id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Budget not found")
+    db.delete(record)
+    db.commit()
+    return {"message": "Budget deleted"}
+
+
+@app.get("/api/goals", response_model=List[GoalResponse])
+def get_goals(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return db.query(SavingsGoal).filter(SavingsGoal.user_id == current_user.id).order_by(SavingsGoal.created_at.desc()).all()
+
+
+@app.post("/api/goals", response_model=GoalResponse, status_code=status.HTTP_201_CREATED)
+def create_goal(goal: GoalBase, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    data = goal.model_dump()
+    data["target_date"] = data["target_date"].isoformat() if data["target_date"] else None
+    record = SavingsGoal(user_id=current_user.id, **data)
+    db.add(record)
+    db.commit()
+    db.refresh(record)
+    return record
+
+
+@app.delete("/api/goals/{goal_id}")
+def delete_goal(goal_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    record = db.query(SavingsGoal).filter(SavingsGoal.id == goal_id, SavingsGoal.user_id == current_user.id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Savings goal not found")
+    db.delete(record)
+    db.commit()
+    return {"message": "Savings goal deleted"}
 
 
 # Serving the built-in frontend from the API gives deployed browsers a same-origin

@@ -41,6 +41,23 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class UserUpdate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100)
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 2:
+            raise ValueError("Name must contain at least 2 characters")
+        return value
+
+
+class PasswordChange(BaseModel):
+    current_password: str = Field(..., min_length=1, max_length=128)
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+
 class TransactionBase(BaseModel):
     """Base transaction schema."""
     type: str = Field(..., description="Transaction type: 'income' or 'expense'")
@@ -110,3 +127,30 @@ class CategoriesResponse(BaseModel):
     """Schema for available categories."""
     income: list[str]
     expense: list[str]
+
+
+class BudgetBase(BaseModel):
+    category: str = Field(..., min_length=1, max_length=100)
+    limit_amount: float = Field(..., gt=0)
+    month: str = Field(..., pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
+
+
+class BudgetResponse(BudgetBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class GoalBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    target_amount: float = Field(..., gt=0)
+    current_amount: float = Field(0, ge=0)
+    target_date: Optional[Date] = None
+
+
+class GoalResponse(GoalBase):
+    id: int
+
+    class Config:
+        from_attributes = True

@@ -27,6 +27,7 @@ let currentEditingId = null;
 let authMode = 'login';
 let authToken = localStorage.getItem('herbudget_token') || null;
 let authEventsBound = false;
+let currentUser = null;
 
 // ============================================
 // DOM Elements
@@ -187,6 +188,15 @@ async function getCategorySpending() {
     return await apiRequest('/dashboard/categories');
 }
 
+async function getBudgets() { return await apiRequest('/budgets'); }
+async function createBudget(data) { return await apiRequest('/budgets', { method: 'POST', body: JSON.stringify(data) }); }
+async function deleteBudget(id) { return await apiRequest(`/budgets/${id}`, { method: 'DELETE' }); }
+async function getGoals() { return await apiRequest('/goals'); }
+async function createGoal(data) { return await apiRequest('/goals', { method: 'POST', body: JSON.stringify(data) }); }
+async function deleteGoal(id) { return await apiRequest(`/goals/${id}`, { method: 'DELETE' }); }
+async function updateProfile(data) { return await apiRequest('/auth/me', { method: 'PATCH', body: JSON.stringify(data) }); }
+async function changePassword(data) { return await apiRequest('/auth/password', { method: 'PUT', body: JSON.stringify(data) }); }
+
 // ============================================
 // UI Functions
 // ============================================
@@ -239,6 +249,7 @@ function showAppScreen() {
 
 function logout() {
     authToken = null;
+    currentUser = null;
     localStorage.removeItem('herbudget_token');
     authMode = 'login';
     const authNameGroup = document.getElementById('authNameGroup');
@@ -250,7 +261,61 @@ function logout() {
     authTabs.forEach(tab => tab.classList.toggle('active', tab.dataset.authTab === 'login'));
 
     showAuthScreen();
-    showNotification('Session expired. Please log in again.', 'warning');
+    showNotification('You have been logged out.', 'success');
+}
+
+function renderPage(page) {
+    const dashboardPage = document.getElementById('dashboardPage');
+    const secondaryPage = document.getElementById('secondaryPage');
+    if (page === 'home') {
+        dashboardPage.style.display = 'block';
+        secondaryPage.style.display = 'none';
+        return;
+    }
+
+    dashboardPage.style.display = 'none';
+    secondaryPage.style.display = 'block';
+    const pageTitles = { transactions: 'Transactions', budgets: 'Budgets', goals: 'Savings goals', analytics: 'Reports', settings: 'Settings' };
+    secondaryPage.innerHTML = `<div class="page-title"><p class="eyebrow">HerBudget</p><h2>${pageTitles[page]}</h2></div><div id="pageContent" class="page-content"><div class="loading">Loading...</div></div>`;
+    const content = document.getElementById('pageContent');
+
+    if (page === 'transactions') {
+        content.innerHTML = `<div class="panel-card"><div class="section-header"><h3>All transactions</h3><button class="btn btn-primary" id="pageAddTransaction">+ Add transaction</button></div>${transactions.length ? `<div class="transactions-list">${transactions.map(t => `<div class="transaction-item"><div class="transaction-left"><div class="transaction-icon">${t.type === 'income' ? '📈' : '📉'}</div><div><strong>${escapeHtml(t.category)}</strong><div class="transaction-date">${t.date}${t.description ? ` · ${escapeHtml(t.description)}` : ''}</div></div></div><div class="transaction-amount ${t.type}">${formatCurrency(t.amount)}</div></div>`).join('')}</div>` : '<p>No transactions yet.</p>'}</div>`;
+        document.getElementById('pageAddTransaction').addEventListener('click', () => openTransactionModal());
+        return;
+    }
+
+    if (page === 'analytics') {
+        const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        content.innerHTML = `<div class="report-grid"><div class="panel-card"><p>Total income</p><h3 class="income">${formatCurrency(income)}</h3></div><div class="panel-card"><p>Total expenses</p><h3 class="expense">${formatCurrency(expenses)}</h3></div><div class="panel-card"><p>Net savings</p><h3>${formatCurrency(income - expenses)}</h3></div></div><div class="panel-card"><h3>Spending by category</h3><div id="reportCategories"><div class="loading">Loading report...</div></div></div>`;
+        getCategorySpending().then(items => {
+            document.getElementById('reportCategories').innerHTML = items.length ? items.map(item => `<div class="category-item"><div class="category-header"><span>${escapeHtml(item.category)}</span><span>${formatCurrency(item.amount)}</span></div><div class="category-bar"><div class="category-fill" style="width:${item.percentage}%">${item.percentage}%</div></div></div>`).join('') : '<p>No expense data yet.</p>';
+        });
+        return;
+    }
+
+    if (page === 'settings') {
+        content.innerHTML = `<div class="settings-grid"><form id="profileForm" class="panel-card"><h3>Change profile</h3><label>Full name<input id="profileName" required maxlength="100" value="${escapeHtml(currentUser?.name || '')}"></label><label>Email<input disabled value="${escapeHtml(currentUser?.email || '')}"></label><button class="btn btn-primary" type="submit">Save changes</button></form><form id="passwordForm" class="panel-card"><h3>Reset password</h3><label>Current password<input id="currentPassword" type="password" required></label><label>New password<input id="newPassword" type="password" minlength="8" required></label><button class="btn btn-primary" type="submit">Update password</button></form></div>`;
+        document.getElementById('profileForm').addEventListener('submit', async event => { event.preventDefault(); try { currentUser = await updateProfile({ name: document.getElementById('profileName').value }); userNameEl.textContent = currentUser.name; showNotification('Profile updated', 'success'); } catch (error) { showNotification(error.message, 'error'); } });
+        document.getElementById('passwordForm').addEventListener('submit', async event => { event.preventDefault(); try { await changePassword({ current_password: document.getElementById('currentPassword').value, new_password: document.getElementById('newPassword').value }); event.currentTarget.reset(); showNotification('Password updated', 'success'); } catch (error) { showNotification(error.message, 'error'); } });
+        return;
+    }
+
+    const isBudget = page === 'budgets';
+    content.innerHTML = `<div class="settings-grid"><form id="planForm" class="panel-card"><h3>Create ${isBudget ? 'budget' : 'savings goal'}</h3><label>${isBudget ? 'Category' : 'Goal name'}<input id="planName" required maxlength="100" placeholder="${isBudget ? 'e.g. Food' : 'e.g. Emergency fund'}"></label><label>${isBudget ? 'Monthly limit (GH₵)' : 'Target amount (GH₵)'}<input id="planAmount" type="number" min="0.01" step="0.01" required></label>${isBudget ? '<label>Month<input id="planDate" type="month" required></label>' : '<label>Target date (optional)<input id="planDate" type="date"></label>'}<button class="btn btn-primary" type="submit">Save</button></form><div class="panel-card"><h3>Your ${isBudget ? 'budgets' : 'goals'}</h3><div id="planList"><div class="loading">Loading...</div></div></div></div>`;
+    document.getElementById('planDate').value = isBudget ? new Date().toISOString().slice(0, 7) : '';
+    const loadPlans = async () => {
+        const records = isBudget ? await getBudgets() : await getGoals();
+        document.getElementById('planList').innerHTML = records.length ? records.map(record => {
+            const amount = isBudget ? record.limit_amount : record.target_amount;
+            const label = isBudget ? `${record.month} · ${escapeHtml(record.category)}` : `${escapeHtml(record.name)}${record.target_date ? ` · ${record.target_date}` : ''}`;
+            return `<div class="plan-row"><span>${label}</span><strong>${formatCurrency(amount)}</strong><button class="btn-delete plan-delete" data-id="${record.id}">Delete</button></div>`;
+        }).join('') : `<p>No ${isBudget ? 'budgets' : 'goals'} yet.</p>`;
+        document.querySelectorAll('.plan-delete').forEach(button => button.addEventListener('click', async () => { await (isBudget ? deleteBudget(button.dataset.id) : deleteGoal(button.dataset.id)); await loadPlans(); showNotification('Deleted', 'success'); }));
+    };
+    document.getElementById('planForm').addEventListener('submit', async event => { event.preventDefault(); try { const value = Number(document.getElementById('planAmount').value); if (isBudget) await createBudget({ category: document.getElementById('planName').value, limit_amount: value, month: document.getElementById('planDate').value }); else await createGoal({ name: document.getElementById('planName').value, target_amount: value, current_amount: 0, target_date: document.getElementById('planDate').value || null }); event.currentTarget.reset(); await loadPlans(); showNotification('Saved', 'success'); } catch (error) { showNotification(error.message, 'error'); } });
+    loadPlans().catch(error => { document.getElementById('planList').textContent = error.message; });
 }
 
 /**
@@ -497,7 +562,7 @@ function setUserGreeting() {
     else if (hour < 18) greeting = 'Good afternoon';
 
     if (greetingEl) greetingEl.textContent = greeting;
-    if (userNameEl) userNameEl.textContent = 'Sarah Mitchell';
+    if (userNameEl && currentUser?.name) userNameEl.textContent = currentUser.name;
 }
 
 /**
@@ -625,25 +690,11 @@ document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', (event) => {
         event.preventDefault();
         document.querySelectorAll('.nav-item').forEach(navItem => navItem.classList.toggle('active', navItem === item));
-
-        switch (item.dataset.page) {
-            case 'home':
-                document.querySelector('.app-main')?.scrollTo({ top: 0, behavior: 'smooth' });
-                break;
-            case 'transactions':
-                document.querySelector('.transactions-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                break;
-            case 'analytics':
-                document.querySelector('.category-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                break;
-            case 'settings':
-                showNotification('Settings are ready for customization', 'warning');
-                break;
-            default:
-                break;
-        }
+        renderPage(item.dataset.page);
     });
 });
+
+document.getElementById('logoutBtn').addEventListener('click', logout);
 
 confirmCancelBtn.addEventListener('click', () => {
     confirmModal.style.display = 'none';
@@ -726,9 +777,9 @@ async function handleAuthSubmit(event) {
 
 async function loadCurrentUserProfile() {
     try {
-        const user = await apiRequest('/auth/me');
-        if (userNameEl && user?.name) {
-            userNameEl.textContent = user.name;
+        currentUser = await apiRequest('/auth/me');
+        if (userNameEl && currentUser?.name) {
+            userNameEl.textContent = currentUser.name;
         }
     } catch (error) {
         console.error('Failed to load current user profile:', error);

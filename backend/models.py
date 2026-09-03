@@ -33,3 +33,26 @@ class Transaction(Base):
     date = Column(String, nullable=False)  # Format: YYYY-MM-DD
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
+class Budget(Base):
+    __tablename__ = "budgets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    category = Column(String, nullable=False)
+    limit_amount = Column(Float, nullable=False)
+    month = Column(String, nullable=False)  # YYYY-MM
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class SavingsGoal(Base):
+    __tablename__ = "savings_goals"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    name = Column(String, nullable=False)
+    target_amount = Column(Float, nullable=False)
+    current_amount = Column(Float, nullable=False, default=0)
+    target_date = Column(String, nullable=True)  # YYYY-MM-DD
+    created_at = Column(DateTime, server_default=func.now())
