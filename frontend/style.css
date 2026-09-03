@@ -1775,3 +1775,195 @@ body::before {
         margin: 0;
     }
 }
+
+/* Secondary tab views */
+.secondary-page {
+    padding: 30px 28px 48px;
+}
+
+.page-title {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 24px;
+}
+
+.page-title h2 {
+    color: var(--text);
+    font-size: clamp(1.55rem, 2.5vw, 2.15rem);
+    letter-spacing: -0.04em;
+}
+
+.page-content {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 1120px;
+}
+
+.panel-card {
+    min-width: 0;
+    padding: 22px;
+    background: linear-gradient(145deg, rgba(20, 29, 45, 0.88), rgba(12, 19, 31, 0.88));
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 20px;
+    box-shadow: 0 18px 36px rgba(2, 6, 23, 0.2);
+}
+
+.panel-card h3 {
+    color: var(--text);
+    font-size: 1.02rem;
+    letter-spacing: -0.02em;
+    margin-bottom: 18px;
+}
+
+.page-content > .panel-card > .section-header {
+    margin-bottom: 18px;
+}
+
+.settings-grid,
+.report-grid {
+    display: grid;
+    gap: 18px;
+}
+
+.settings-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.report-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.report-grid .panel-card {
+    min-height: 126px;
+}
+
+.report-grid .panel-card p {
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.report-grid .panel-card h3 {
+    font-size: 1.45rem;
+    margin-bottom: 0;
+}
+
+.settings-grid form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.settings-grid label,
+#planForm label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.settings-grid input,
+#planForm input {
+    width: 100%;
+    padding: 12px 13px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 12px;
+    background: rgba(5, 10, 18, 0.55);
+    color: var(--text);
+    font: inherit;
+    outline: none;
+}
+
+.settings-grid input:focus,
+#planForm input:focus {
+    border-color: rgba(34, 211, 238, 0.7);
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.12);
+}
+
+.settings-grid .btn,
+#planForm .btn {
+    align-self: flex-start;
+    margin-top: 4px;
+}
+
+.settings-grid + .panel-card,
+.page-content > .settings-grid + .panel-card {
+    margin-top: 0;
+}
+
+#planForm {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.settings-grid:has(#planForm) {
+    grid-template-columns: minmax(250px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.plan-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 0;
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+.plan-row:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.plan-row span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.plan-row strong {
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.secondary-page .transactions-list {
+    gap: 8px;
+}
+
+.secondary-page .transaction-item {
+    background: rgba(5, 10, 18, 0.3);
+}
+
+@media (max-width: 760px) {
+    .secondary-page {
+        padding: 22px 18px 36px;
+    }
+
+    .settings-grid,
+    .report-grid,
+    .settings-grid:has(#planForm) {
+        grid-template-columns: 1fr;
+    }
+
+    .panel-card {
+        padding: 18px;
+    }
+
+    .plan-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px 12px;
+    }
+
+    .plan-row .btn-delete {
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+}
