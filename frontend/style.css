@@ -2111,7 +2111,8 @@ body::before {
     }
 
     .sidebar,
-    .topbar {
+    .topbar,
+    .side-nav {
         display: none;
     }
 
