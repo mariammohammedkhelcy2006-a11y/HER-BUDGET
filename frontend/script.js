@@ -44,6 +44,11 @@ const notificationBtn = document.getElementById('notificationBtn');
 const settingsBtn = document.getElementById('settingsBtn');
 const topLogoutBtn = document.getElementById('topLogoutBtn');
 const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const mobileDrawer = document.getElementById('mobileDrawer');
+const mobileDrawerOverlay = document.getElementById('mobileDrawerOverlay');
+const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+const drawerLogoutBtn = document.getElementById('drawerLogoutBtn');
 const seeAllLink = document.getElementById('seeAllLink');
 const userNameEl = document.getElementById('userName');
 
@@ -250,6 +255,7 @@ function showAppScreen() {
 }
 
 function logout() {
+    closeMobileDrawer();
     authToken = null;
     currentUser = null;
     localStorage.removeItem('herbudget_token');
@@ -266,11 +272,34 @@ function logout() {
     showNotification('You have been logged out.', 'success');
 }
 
+function setMobileDrawerPage(page) {
+    document.querySelectorAll('.drawer-nav-item[data-page]').forEach(item => {
+        const isProfile = item.dataset.profileEntry === 'true';
+        item.classList.toggle('active', item.dataset.page === page && !isProfile);
+    });
+}
+
+function openMobileDrawer() {
+    mobileDrawer?.classList.add('open');
+    mobileDrawerOverlay?.classList.add('visible');
+    mobileDrawer?.setAttribute('aria-hidden', 'false');
+    mobileMenuBtn?.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('drawer-open');
+}
+
+function closeMobileDrawer() {
+    mobileDrawer?.classList.remove('open');
+    mobileDrawerOverlay?.classList.remove('visible');
+    mobileDrawer?.setAttribute('aria-hidden', 'true');
+    mobileMenuBtn?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('drawer-open');
+}
+
 function renderPage(page) {
     const dashboardPage = document.getElementById('dashboardPage');
     const secondaryPage = document.getElementById('secondaryPage');
     if (page === 'home') {
-        dashboardPage.style.display = 'block';
+        dashboardPage.style.display = '';
         secondaryPage.style.display = 'none';
         return;
     }
@@ -292,7 +321,9 @@ function renderPage(page) {
         const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
         content.innerHTML = `<div class="report-grid"><div class="panel-card"><p>Total income</p><h3 class="income">${formatCurrency(income)}</h3></div><div class="panel-card"><p>Total expenses</p><h3 class="expense">${formatCurrency(expenses)}</h3></div><div class="panel-card"><p>Net savings</p><h3>${formatCurrency(income - expenses)}</h3></div></div><div class="panel-card"><h3>Spending by category</h3><div id="reportCategories"><div class="loading">Loading report...</div></div></div>`;
         getCategorySpending().then(items => {
-            document.getElementById('reportCategories').innerHTML = items.length ? items.map(item => `<div class="category-item"><div class="category-header"><span>${escapeHtml(item.category)}</span><span>${formatCurrency(item.amount)}</span></div><div class="category-bar"><div class="category-fill" style="width:${item.percentage}%">${item.percentage}%</div></div></div>`).join('') : '<p>No expense data yet.</p>';
+            const reportCategories = document.getElementById('reportCategories');
+            if (!reportCategories) return;
+            reportCategories.innerHTML = items.length ? items.map(item => `<div class="category-item"><div class="category-header"><span>${escapeHtml(item.category)}</span><span>${formatCurrency(item.amount)}</span></div><div class="category-bar"><div class="category-fill" style="width:${item.percentage}%">${item.percentage}%</div></div></div>`).join('') : '<p>No expense data yet.</p>';
         });
         return;
     }
@@ -309,7 +340,9 @@ function renderPage(page) {
     document.getElementById('planDate').value = isBudget ? new Date().toISOString().slice(0, 7) : '';
     const loadPlans = async () => {
         const records = isBudget ? await getBudgets() : await getGoals();
-        document.getElementById('planList').innerHTML = records.length ? records.map(record => {
+        const planList = document.getElementById('planList');
+        if (!planList) return;
+        planList.innerHTML = records.length ? records.map(record => {
             const amount = isBudget ? record.limit_amount : record.target_amount;
             const label = isBudget ? `${record.month} · ${escapeHtml(record.category)}` : `${escapeHtml(record.name)}${record.target_date ? ` · ${record.target_date}` : ''}`;
             return `<div class="plan-row"><span>${label}</span><strong>${formatCurrency(amount)}</strong><button class="btn-delete plan-delete" data-id="${record.id}">Delete</button></div>`;
@@ -317,7 +350,10 @@ function renderPage(page) {
         document.querySelectorAll('.plan-delete').forEach(button => button.addEventListener('click', async () => { await (isBudget ? deleteBudget(button.dataset.id) : deleteGoal(button.dataset.id)); await loadPlans(); showNotification('Deleted', 'success'); }));
     };
     document.getElementById('planForm').addEventListener('submit', async event => { event.preventDefault(); try { const value = Number(document.getElementById('planAmount').value); if (isBudget) await createBudget({ category: document.getElementById('planName').value, limit_amount: value, month: document.getElementById('planDate').value }); else await createGoal({ name: document.getElementById('planName').value, target_amount: value, current_amount: 0, target_date: document.getElementById('planDate').value || null }); event.currentTarget.reset(); await loadPlans(); showNotification('Saved', 'success'); } catch (error) { showNotification(error.message, 'error'); } });
-    loadPlans().catch(error => { document.getElementById('planList').textContent = error.message; });
+    loadPlans().catch(error => {
+        const planList = document.getElementById('planList');
+        if (planList) planList.textContent = error.message;
+    });
 }
 
 /**
@@ -680,6 +716,21 @@ notificationBtn.addEventListener('click', () => showNotification('Notifications 
 settingsBtn.addEventListener('click', () => showNotification('Settings panel coming soon', 'warning'));
 topLogoutBtn.addEventListener('click', logout);
 forgotPasswordLink.addEventListener('click', () => showNotification('Sign in, then open Settings to reset your password.', 'warning'));
+mobileMenuBtn.addEventListener('click', () => {
+    if (mobileDrawer.classList.contains('open')) closeMobileDrawer();
+    else openMobileDrawer();
+});
+drawerCloseBtn.addEventListener('click', closeMobileDrawer);
+mobileDrawerOverlay.addEventListener('click', closeMobileDrawer);
+drawerLogoutBtn.addEventListener('click', logout);
+document.querySelectorAll('.drawer-nav-item[data-page]').forEach(item => {
+    item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        renderPage(page);
+        setMobileDrawerPage(item.dataset.profileEntry === 'true' ? 'profile' : page);
+        closeMobileDrawer();
+    });
+});
 seeAllLink.addEventListener('click', (e) => {
     e.preventDefault();
     document.querySelector('.transactions-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
