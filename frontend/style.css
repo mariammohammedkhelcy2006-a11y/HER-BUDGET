@@ -467,6 +467,19 @@ body::before {
     color: white;
 }
 
+@media (min-width: 761px) {
+    .mobile-header,
+    .mobile-drawer,
+    .mobile-drawer-overlay,
+    .mobile-menu-btn,
+    .mobile-brand,
+    .drawer-close,
+    .mobile-drawer-nav,
+    .mobile-drawer-footer {
+        display: none !important;
+    }
+}
+
 .overview-topbar {
     display: flex;
     align-items: center;
