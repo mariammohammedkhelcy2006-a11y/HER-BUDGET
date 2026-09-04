@@ -2285,6 +2285,11 @@ body::before {
     #dashboardPage > .services-section { order: 6; }
     #dashboardPage > .filters-section { order: 7; }
 
+    #dashboardPage > .services-section,
+    #dashboardPage > .filters-section {
+        display: none;
+    }
+
     .dashboard-description {
         max-width: 30ch;
         margin-top: 7px;
@@ -2321,5 +2326,31 @@ body::before {
 
     .transaction-amount {
         font-size: 0.86rem;
+    }
+
+    .overview-topbar {
+        padding-top: 18px;
+    }
+
+    .overview-topbar h2 {
+        font-size: 1.55rem;
+    }
+
+    .balance-meta .secondary-action,
+    .balance-footer .trend-pill {
+        display: none;
+    }
+
+    .balance-meta {
+        margin-bottom: 24px;
+    }
+
+    .section-header {
+        align-items: flex-start;
+    }
+
+    .transactions-section .see-all-link {
+        padding-top: 2px;
+        white-space: nowrap;
     }
 }
